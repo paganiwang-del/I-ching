@@ -1,0 +1,501 @@
+:root {
+    --bg-color: #fdfaf5; /* 宣紙底色 */
+    --sidebar-bg: rgba(245, 240, 230, 0.8);
+    --accent-color: #8b4513; /* 古典棕褐 */
+    --accent-hover: #d4af37; /* 金色 */
+    --text-primary: #2c3e50; /* 墨色 */
+    --text-secondary: #5d6d7e;
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --border-color: rgba(139, 69, 19, 0.15);
+    --yin-color: #7d3c98;
+    --yang-color: #d35400;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Noto Serif TC', serif;
+    background-image: url('bg_ink.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    overflow: hidden;
+}
+
+.app-container {
+    display: flex;
+    height: 100vh;
+    position: relative;
+    z-index: 2;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 260px;
+    background-color: var(--sidebar-bg);
+    backdrop-filter: blur(10px);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    padding: 2rem 0;
+}
+
+.logo {
+    padding: 0 2rem;
+    margin-bottom: 3rem;
+}
+
+.logo h1 {
+    font-size: 1.5rem;
+    color: var(--accent-color);
+    letter-spacing: 4px;
+}
+
+.nav-links {
+    list-style: none;
+    flex-grow: 1;
+}
+
+.nav-links li {
+    padding: 1rem 2rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.nav-links li.active {
+    color: var(--accent-color);
+    background: rgba(212, 175, 55, 0.1);
+    border-left: 4px solid var(--accent-color);
+}
+
+.nav-links li:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.time-display {
+    padding: 1rem 2rem;
+    font-size: 0.9rem;
+    color: var(--accent-color);
+    border-top: 1px solid var(--border-color);
+}
+
+/* Main Content */
+.content {
+    flex-grow: 1;
+    padding: 2rem;
+    overflow-y: auto;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Divination Stage */
+.stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 60vh;
+    background: radial-gradient(circle, rgba(139, 69, 19, 0.05) 0%, transparent 70%);
+}
+
+.coin-container {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.coin {
+    width: 120px;
+    height: 120px;
+    background-image: url('coin.png');
+    background-size: cover;
+    background-position: center;
+    border-radius: 50%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+    transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #fff;
+    border: none;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.coin::after {
+    content: "";
+    display: none;
+}
+
+/* Animations */
+@keyframes shake {
+    0% { transform: translate(0,0) rotate(0deg); }
+    25% { transform: translate(5px, -5px) rotate(5deg); }
+    50% { transform: translate(-5px, 5px) rotate(-5deg); }
+    75% { transform: translate(5px, 5px) rotate(5deg); }
+    100% { transform: translate(0,0) rotate(0deg); }
+}
+
+.shaking .coin {
+    animation: shake 0.2s infinite;
+}
+
+/* Buttons */
+.premium-btn {
+    padding: 1.2rem 4rem;
+    font-size: 1.4rem;
+    background: #b03a2e; /* 硃砂紅 */
+    color: #fff;
+    border: none;
+    border-bottom: 5px solid #7b241c;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    letter-spacing: 4px;
+    box-shadow: 0 10px 30px rgba(176, 58, 46, 0.3);
+    transition: all 0.2s;
+    font-family: 'Noto Serif TC', serif;
+}
+
+.premium-btn:hover {
+    transform: translateY(-2px);
+    background: #c0392b;
+    box-shadow: 0 12px 35px rgba(176, 58, 46, 0.4);
+}
+
+.premium-btn:active {
+    transform: translateY(3px);
+    border-bottom-width: 2px;
+}
+
+.secondary-btn:hover {
+    background: rgba(212, 175, 55, 0.1);
+}
+
+.final-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 3rem;
+}
+
+.premium-btn.success {
+    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+}
+
+/* Results Table */
+.result-area {
+    margin-top: 2rem;
+    animation: fadeIn 0.8s;
+}
+
+.gua-pair {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.gua-box {
+    background: var(--glass-bg);
+    backdrop-filter: blur(5px);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    min-width: 400px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.liuyao-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.liuyao-table th, .liuyao-table td {
+    padding: 0.8rem;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.liuyao-table th {
+    color: var(--accent-color);
+    font-size: 0.9rem;
+}
+
+/* Yao Visuals */
+.yao-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    min-width: 140px;
+}
+
+.yao-graphic {
+    width: 70px;
+    height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.yang-graphic {
+    background-color: var(--yang-color);
+    box-shadow: 0 0 10px rgba(230, 126, 34, 0.3);
+}
+
+.yin-graphic {
+    display: flex;
+    justify-content: space-between;
+    background: transparent !important;
+}
+
+.yin-graphic::before, .yin-graphic::after {
+    content: "";
+    width: 30px;
+    height: 100%;
+    background-color: var(--yin-color);
+    border-radius: 2px;
+    box-shadow: 0 0 10px rgba(142, 68, 173, 0.3);
+}
+
+.change-mark {
+    font-size: 1.4rem;
+    font-weight: bold;
+    width: 20px;
+}
+
+.shi { color: #e74c3c; font-weight: bold; border: 1px solid #e74c3c; border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; }
+.ying { color: #3498db; font-weight: bold; border: 1px solid #3498db; border-radius: 4px; padding: 2px 6px; font-size: 0.8rem; }
+
+/* History */
+.history-item {
+    background: var(--glass-bg);
+    backdrop-filter: blur(5px);
+    border: 1px solid var(--border-color);
+    padding: 1.2rem;
+    margin-bottom: 1rem;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+}
+
+.hist-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.delete-btn {
+    padding: 0.6rem 1.2rem;
+    background: rgba(231, 76, 60, 0.1);
+    border: 1px solid #e74c3c;
+    color: #e74c3c;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.delete-btn:hover {
+    background: #e74c3c;
+    color: #fff;
+}
+
+.status-tag {
+    font-size: 0.75rem;
+    padding: 2px 4px;
+    border-radius: 3px;
+    background: rgba(176, 58, 46, 0.05);
+    color: #b03a2e;
+    font-weight: bold;
+}
+
+.shen-sha-info {
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border-color);
+    font-size: 0.85rem;
+    color: var(--accent-color);
+    text-align: center;
+    font-style: italic;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Canvas 動畫 (雲霧 & 流水) --- */
+#nature-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* 浮雲特效 */
+.cloud {
+    position: absolute;
+    background: radial-gradient(circle, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0) 70%); /* 改為深灰/黑色水墨 */
+    border-radius: 50%;
+    filter: blur(25px);
+    opacity: 1; /* 提升不透明度 */
+    animation: floatCloud linear infinite;
+}
+.cloud-1 { width: 500px; height: 300px; top: 5%; left: 10%; animation-duration: 80s; }
+.cloud-2 { width: 700px; height: 400px; top: 40%; left: 50%; animation-duration: 120s; animation-delay: -20s; }
+.cloud-3 { width: 400px; height: 200px; top: 70%; left: -10%; animation-duration: 60s; animation-delay: -10s; }
+
+@keyframes floatCloud {
+    0% { transform: translateX(-20vw) translateY(0); }
+    50% { transform: translateX(20vw) translateY(-20px); }
+    100% { transform: translateX(-20vw) translateY(0); }
+}
+
+/* 飛鳥特效 */
+.bird {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    opacity: 0;
+    animation: flyBird linear infinite;
+}
+.bird-1 { top: 15%; left: -50px; animation-duration: 35s; animation-delay: 5s; }
+.bird-2 { top: 25%; left: -50px; animation-duration: 45s; animation-delay: 20s; transform: scale(0.7); }
+
+@keyframes flyBird {
+    0% { transform: translate(0, 0) scale(1); opacity: 0; }
+    10% { opacity: 0.6; }
+    50% { transform: translate(50vw, -10vh) scale(1.2); opacity: 0.8; }
+    90% { opacity: 0.6; }
+    100% { transform: translate(120vw, -20vh) scale(0.8); opacity: 0; }
+}
+
+/* 流水墨波特效 */
+.water-waves {
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 100%;
+    height: 250px;
+    opacity: 0.8; /* 再度強化不透明度 */
+}
+.wave {
+    position: absolute;
+    bottom: 0;
+    left: -20%;
+    width: 140%;
+    height: 100%;
+    background: radial-gradient(ellipse at bottom, rgba(0, 0, 0, 0.4) 0%, transparent 70%);
+    border-radius: 50% 50% 0 0;
+    animation: waveAction 8s ease-in-out infinite alternate;
+}
+.wave-2 {
+    bottom: -20px;
+    left: -30%;
+    opacity: 0.5;
+    animation-duration: 20s;
+    animation-direction: alternate-reverse;
+}
+
+@keyframes waveAction {
+    0% { transform: translateX(0) scaleY(1); }
+    100% { transform: translateX(10%) scaleY(1.2); }
+}
+
+/* 飛龍/水墨爆發特效 */
+.dragon-effect {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    background: rgba(0, 0, 0, 0.9);
+    box-shadow: 0 0 200px 200px rgba(0, 0, 0, 0.9), 0 0 400px 300px rgba(139, 69, 19, 0.6);
+    border-radius: 50%;
+    filter: blur(25px);
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.1);
+    pointer-events: none;
+    z-index: 99999; /* 確保在所有UI的最上層 */
+    transition: all 1.2s cubic-bezier(0.1, 0.8, 0.2, 1); /* 加快爆發速度 */
+}
+.dragon-effect.active {
+    opacity: 0.8; /* 提高不透明度 */
+    transform: translate(-50%, -50%) scale(10);
+}
+
+/* --- 易經人生智慧 --- */
+.wisdom-container {
+    margin-top: 30px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(139, 69, 19, 0.2);
+    border-radius: 8px;
+    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.5);
+    text-align: center;
+    position: relative;
+    z-index: 10;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.wisdom-title {
+    color: var(--accent-hover);
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    letter-spacing: 2px;
+    border-bottom: 1px dashed rgba(139, 69, 19, 0.3);
+    padding-bottom: 10px;
+    display: inline-block;
+}
+.wisdom-carousel {
+    position: relative;
+    padding-top: 10px;
+}
+.wisdom-quote {
+    position: relative;
+    opacity: 0.4;
+    transform: scale(0.98);
+    transition: all 0.5s ease;
+    color: var(--text-color);
+    line-height: 1.8;
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+    text-align: left;
+    padding: 0 20px;
+}
+.wisdom-quote.active {
+    opacity: 1;
+    transform: scale(1.02);
+    text-shadow: 0 0 8px rgba(212, 175, 55, 0.5); /* 金色發光效果 */
+}
+.wisdom-quote strong {
+    color: var(--accent-color);
+    font-weight: 600;
+}

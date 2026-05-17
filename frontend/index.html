@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>專業六爻排盤系統</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&display=swap" rel="stylesheet">
+    <script type="text/javascript" src="/eel.js"></script>
+</head>
+<body>
+    <!-- 水墨動畫容器 -->
+    <!-- Canvas 動畫：雲霧與流水 (JavaScript 直接繪製保證可見) -->
+    <canvas id="nature-canvas"></canvas>
+
+    <!-- 飛龍特效容器 (獨立放置確保 z-index 生效) -->
+    <div class="dragon-effect" id="dragon-effect"></div>
+
+    <div class="app-container">
+        <!-- 側邊導航 -->
+        <nav class="sidebar">
+            <div class="logo">
+                <h1>六爻系統</h1>
+            </div>
+            <ul class="nav-links">
+                <li class="active" data-tab="divination">
+                    <span class="icon">☯</span> 起卦占卜
+                </li>
+                <li data-tab="history">
+                    <span class="icon">📜</span> 歷史紀錄
+                </li>
+            </ul>
+            <div class="time-display" id="current-ganzhi">
+                --年 --月 --日 --時
+            </div>
+        </nav>
+
+        <!-- 主內容區 -->
+        <main class="content">
+            <!-- 起卦分頁 -->
+            <section id="tab-divination" class="tab-content active">
+                <div class="stage">
+                    <div class="coin-container" id="coin-area">
+                        <div class="coin" id="coin-1"></div>
+                        <div class="coin" id="coin-2"></div>
+                        <div class="coin" id="coin-3"></div>
+                    </div>
+                    
+                    <div class="action-bar">
+                        <button id="btn-toss" class="premium-btn">擲筊起卦</button>
+                        <p class="status-text" id="status-text">請擲三枚銅錢，共需六次。</p>
+                    </div>
+
+                    <div class="divination-progress">
+                        <div class="progress-dot" data-step="1"></div>
+                        <div class="progress-dot" data-step="2"></div>
+                        <div class="progress-dot" data-step="3"></div>
+                        <div class="progress-dot" data-step="4"></div>
+                        <div class="progress-dot" data-step="5"></div>
+                        <div class="progress-dot" data-step="6"></div>
+                    </div>
+                </div>
+
+                <!-- 易經人生智慧 -->
+                <div class="wisdom-container">
+                    <h3 class="wisdom-title">《易經》人生智慧</h3>
+                    <div class="wisdom-carousel">
+                        <div class="wisdom-quote active"><strong>擁抱變化：</strong>世事恆常在變，學會與變化共舞，順境不驕，逆境不餒。</div>
+                        <div class="wisdom-quote"><strong>順時借勢：</strong>認清當下的時機與定位，懂得何時沉潛蓄勢，何時順勢而為。</div>
+                        <div class="wisdom-quote"><strong>守中持正：</strong>凡事留有餘地，不走極端，在失衡的世界中找到內心平衡。</div>
+                        <div class="wisdom-quote"><strong>境隨心轉：</strong>吉凶不在天意，而在你的起心動念；修正行為，就能改變格局。</div>
+                        <div class="wisdom-quote"><strong>主導命運：</strong>卦象是提示而非宿命，局勢如何發展，方向盤始終在你手中。</div>
+                    </div>
+                </div>
+
+                <div class="result-area" id="result-display" style="display: none;">
+                    <div class="gua-pair">
+                        <div class="gua-box" id="ben-gua-box">
+                            <h3>本卦</h3>
+                            <div class="gua-table-container">
+                                <table class="liuyao-table">
+                                    <thead>
+                                        <tr>
+                                            <th>六神</th>
+                                            <th>六親</th>
+                                            <th>爻象</th>
+                                            <th>納甲</th>
+                                            <th>五行</th>
+                                            <th>狀態</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ben-gua-body"></tbody>
+                                </table>
+                            </div>
+                            <div class="gua-footer">
+                                <span class="palace-label" id="ben-palace"></span>
+                                <span class="gua-name" id="ben-name"></span>
+                            </div>
+                            <div class="shen-sha-info" id="ben-shen-sha"></div>
+                        </div>
+
+                        <div class="gua-box" id="bian-gua-box" style="display: none;">
+                            <h3>變卦</h3>
+                            <div class="gua-table-container">
+                                <table class="liuyao-table">
+                                    <thead>
+                                        <tr>
+                                            <th>六神</th>
+                                            <th>六親</th>
+                                            <th>爻象</th>
+                                            <th>納甲</th>
+                                            <th>五行</th>
+                                            <th>狀態</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="bian-gua-body"></tbody>
+                                </table>
+                            </div>
+                            <div class="gua-footer">
+                                <span class="palace-label" id="bian-palace"></span>
+                                <span class="gua-name" id="bian-name"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="final-actions">
+                        <button id="btn-copy-ai" class="premium-btn" style="margin-bottom: 10px;">複製解盤格式 (AI專用)</button>
+                        <button id="btn-reset" class="secondary-btn">重新起卦</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 歷史紀錄分頁 -->
+            <section id="tab-history" class="tab-content">
+                <h2>占卜歷史</h2>
+                <div class="history-list" id="history-list">
+                    <!-- 紀錄動態插入 -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
