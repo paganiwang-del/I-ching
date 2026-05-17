@@ -4,6 +4,7 @@ import datetime
 import sys
 import os
 
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from liuyao_logic import LiuYaoEngine
 from calendar_engine import CalendarEngine
