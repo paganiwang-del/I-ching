@@ -92,7 +92,7 @@ export default function Home() {
                       <tbody>
                         {result.ben_gua.yaos.map((yao: any, idx: number) => (
                           <tr key={idx} style={{ borderBottom: "1px solid rgba(139, 69, 19, 0.1)" }}>
-                            <td style={{ padding: "0.5rem", color: "var(--text-secondary)" }}>{yao.six_beast}</td>
+                            <td style={{ padding: "0.5rem", color: "var(--text-secondary)" }}>{yao.liu_shen}</td>
                             <td style={{ padding: "0.5rem" }}>
                               {yao.yao_type === '陽' ? (
                                 <div style={{ width: "60px", height: "8px", background: "var(--yang-color)", margin: "0 auto", borderRadius: "2px" }}></div>
@@ -104,8 +104,8 @@ export default function Home() {
                               )}
                             </td>
                             <td style={{ padding: "0.5rem", color: "var(--text-primary)" }}>{yao.element}{yao.branch} {yao.relation}</td>
-                            <td style={{ padding: "0.5rem", fontWeight: "bold", color: yao.shi_ying ? "var(--accent-color)" : "transparent" }}>
-                              {yao.shi_ying || "-"}
+                            <td style={{ padding: "0.5rem", fontWeight: "bold", color: (yao.is_shi || yao.is_ying) ? "var(--accent-color)" : "transparent" }}>
+                              {yao.is_shi ? '世' : yao.is_ying ? '應' : '-'}
                             </td>
                           </tr>
                         ))}
