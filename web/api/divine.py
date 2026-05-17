@@ -4,8 +4,6 @@ import datetime
 import sys
 import os
 
-# 加入上層目錄至 sys.path 確保能匯入 liuyao_logic 與 calendar_engine (Vercel 需要這樣處理)
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from liuyao_logic import LiuYaoEngine
 from calendar_engine import CalendarEngine
