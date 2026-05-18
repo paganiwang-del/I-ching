@@ -1,3 +1,27 @@
+// ==================== 網頁/桌面雙端相容適配層 ====================
+if (typeof eel === 'undefined') {
+    const API_BASE_URL = window.location.origin;
+    window.eel = {
+        get_gan_zhi: () => () => fetch(`${API_BASE_URL}/api/ganzhi`).then(r => r.json()),
+        process_divination: (binary_list) => () => fetch(`${API_BASE_URL}/api/divination`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ binary_list })
+        }).then(r => r.json()),
+        get_history: () => () => Promise.resolve([]),
+        delete_record: () => () => Promise.resolve(true)
+    };
+
+    // 網頁版不需要存檔，隱藏「歷史紀錄」導航選項
+    document.addEventListener('DOMContentLoaded', () => {
+        const historyTabBtn = document.querySelector('[data-tab="history"]');
+        if (historyTabBtn) {
+            historyTabBtn.style.display = 'none';
+        }
+    });
+}
+// ========================================================
+
 const coinArea = document.getElementById('coin-area');
 const btnToss = document.getElementById('btn-toss');
 const statusText = document.getElementById('status-text');
