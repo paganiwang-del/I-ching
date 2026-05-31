@@ -19,7 +19,7 @@ def get_gan_zhi():
     return calendar.get_gan_zhi(now)
 
 @eel.expose
-def process_divination(binary_list):
+def process_divination(binary_list, question=""):
     now = datetime.datetime.now()
     timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
     gan_zhi = calendar.get_gan_zhi(now)
@@ -37,6 +37,7 @@ def process_divination(binary_list):
     
     result = {
         'timestamp': timestamp,
+        'question': question,
         'gan_zhi': gan_zhi,
         'ben_gua': ben_info,
         'bian_gua': bian_info if ben_binary != bian_binary else None,

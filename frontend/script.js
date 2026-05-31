@@ -3,10 +3,10 @@ if (typeof eel === 'undefined') {
     const API_BASE_URL = window.location.origin;
     window.eel = {
         get_gan_zhi: () => () => fetch(`${API_BASE_URL}/api/ganzhi`).then(r => r.json()),
-        process_divination: (binary_list) => () => fetch(`${API_BASE_URL}/api/divination`, {
+        process_divination: (binary_list, question) => () => fetch(`${API_BASE_URL}/api/divination`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ binary_list })
+            body: JSON.stringify({ binary_list, question })
         }).then(r => r.json()),
         get_history: () => () => Promise.resolve([]),
         delete_record: () => () => Promise.resolve(true)
@@ -340,7 +340,10 @@ function updateProgress(step) {
 async function finalizeDivination() {
     try {
         if (typeof eel !== 'undefined') {
-            const finalData = await eel.process_divination(results)();
+            const questionInput = document.getElementById('question-input');
+            const question = questionInput && questionInput.value.trim() ? questionInput.value.trim() : '未填寫事項';
+            
+            const finalData = await eel.process_divination(results, question)();
             console.log("排盤結果:", finalData);
             if (finalData) {
                 lastDivinationData = finalData;
@@ -450,7 +453,7 @@ async function loadHistory() {
             historyList.innerHTML = history.map(item => `
                 <div class="history-item" id="history-item-${item.id}">
                     <div class="hist-info">
-                        <strong>${item.timestamp}</strong> - ${item.ben_gua} -> ${item.bian_gua}
+                        <strong>${item.timestamp}</strong> - ${item.data_json.question ? `[${item.data_json.question}] ` : ''}${item.ben_gua} -> ${item.bian_gua}
                         <br><small>${item.gan_zhi.year} ${item.gan_zhi.month} ${item.gan_zhi.day}</small>
                     </div>
                     <div class="hist-actions">
@@ -550,6 +553,7 @@ function formatDataForAI(data) {
     
     // 1. 環境與神煞
     output += `### 1. 基礎環境與神煞\n`;
+    output += `- **問卜事項**: ${data.question || '未填寫事項'}\n`;
     output += `- **占問時間**: ${data.timestamp}\n`;
     output += `- **干支**: ${gz.year}年 ${gz.month}月 ${gz.day}日 ${gz.hour}時\n`;
     output += `- **旬空**: ${kw}\n`;
