@@ -66,9 +66,8 @@ def delete_record(record_id):
     return True
 
 def main():
-    # 啟動 Eel
-    # size 指定視窗大小
-    eel.start('index.html', size=(1200, 850))
+    # 啟動 Eel，使用無痕模式與停用快取防堵 Chrome 快取問題
+    eel.start('index.html', size=(1200, 850), cmdline_args=['--incognito', '--disable-cache'])
 
 if __name__ == '__main__':
     main()
