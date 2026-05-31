@@ -32,6 +32,7 @@ def get_gan_zhi():
 @app.post("/api/divination")
 def process_divination(payload: dict = Body(...)):
     binary_list = payload.get("binary_list")
+    question = payload.get("question", "未填寫事項")
     if not binary_list:
         return {"error": "Invalid binary list"}
         
@@ -52,6 +53,7 @@ def process_divination(payload: dict = Body(...)):
             
     result = {
         'timestamp': timestamp,
+        'question': question,
         'gan_zhi': gan_zhi,
         'ben_gua': ben_info,
         'bian_gua': bian_info if ben_binary != bian_binary else None,
