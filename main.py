@@ -19,7 +19,9 @@ def get_gan_zhi():
     return calendar.get_gan_zhi(now)
 
 @eel.expose
-def process_divination(binary_list, question=""):
+def process_divination(*args):
+    binary_list = args[0] if len(args) > 0 else []
+    question = args[1] if len(args) > 1 else "後端未接收到文字"
     now = datetime.datetime.now()
     timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
     gan_zhi = calendar.get_gan_zhi(now)

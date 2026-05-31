@@ -341,7 +341,7 @@ async function finalizeDivination() {
     try {
         if (typeof eel !== 'undefined') {
             const questionInput = document.getElementById('question-input');
-            const question = questionInput && questionInput.value.trim() ? questionInput.value.trim() : '未填寫事項';
+            const question = questionInput && questionInput.value.trim() ? questionInput.value.trim() : '前端擷取失敗';
             
             const finalData = await eel.process_divination(results, question)();
             console.log("排盤結果:", finalData);
@@ -553,7 +553,7 @@ function formatDataForAI(data) {
     
     // 1. 環境與神煞
     output += `### 1. 基礎環境與神煞\n`;
-    output += `- **問卜事項**: ${data.question || '未填寫事項'}\n`;
+    output += `- **問卜事項**: ${data.question || '最後組裝失敗'}\n`;
     output += `- **占問時間**: ${data.timestamp}\n`;
     output += `- **干支**: ${gz.year}年 ${gz.month}月 ${gz.day}日 ${gz.hour}時\n`;
     output += `- **旬空**: ${kw}\n`;

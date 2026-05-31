@@ -29,7 +29,7 @@ def get_gan_zhi():
 @app.post("/api/divination")
 def process_divination(payload: dict = Body(...)):
     binary_list = payload.get("binary_list")
-    question = payload.get("question", "")
+    question = payload.get("question", "後端未接收到文字")
     if not binary_list:
         return {"error": "Invalid binary list"}
         
