@@ -1,3 +1,5 @@
 fastapi
 tzdata
 sxtwl
+uvicorn
+eel
