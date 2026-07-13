@@ -3,6 +3,11 @@ import math
 from functools import lru_cache
 from zoneinfo import ZoneInfo
 
+try:
+    import sxtwl
+except ImportError:  # pragma: no cover - exercised only in minimal deployments
+    sxtwl = None
+
 
 DEFAULT_TIMEZONE = "Asia/Taipei"
 
@@ -20,6 +25,22 @@ SOLAR_TERM_APPROX = {
     10: (10, 8, 195),
     11: (11, 7, 225),
     12: (12, 7, 255),
+}
+
+# sxtwl uses the standard 24-term index: 1 小寒, 3 立春, ..., 23 大雪.
+SOLAR_TERM_JQ_INDEX = {
+    1: 1,
+    2: 3,
+    3: 5,
+    4: 7,
+    5: 9,
+    6: 11,
+    7: 13,
+    8: 15,
+    9: 17,
+    10: 19,
+    11: 21,
+    12: 23,
 }
 
 
@@ -62,6 +83,35 @@ def _angle_delta(angle: float, target: float) -> float:
 @lru_cache(maxsize=64)
 def _solar_terms(year: int, timezone_name: str):
     timezone = _get_timezone(timezone_name)
+
+    if sxtwl is not None:
+        terms = {}
+        target_indexes = set(SOLAR_TERM_JQ_INDEX.values())
+        # getJieQiByYear starts at 立春 and includes the following January
+        # terms, so inspect the preceding year for 小寒.
+        for source_year in (year - 1, year):
+            for item in sxtwl.getJieQiByYear(source_year):
+                if item.jqIndex not in target_indexes:
+                    continue
+                solar_time = sxtwl.JD2DD(item.jd)
+                shanghai = datetime.timezone(datetime.timedelta(hours=8), "Asia/Shanghai")
+                term = datetime.datetime(
+                    int(solar_time.getYear()),
+                    int(solar_time.getMonth()),
+                    int(solar_time.getDay()),
+                    int(solar_time.getHour()),
+                    int(solar_time.getMin()),
+                    tzinfo=shanghai,
+                ) + datetime.timedelta(seconds=float(solar_time.getSec()))
+                term = term.astimezone(timezone)
+                if term.year == year:
+                    for month, jq_index in SOLAR_TERM_JQ_INDEX.items():
+                        if item.jqIndex == jq_index:
+                            terms[month] = term
+        if len(terms) == 12:
+            return terms
+
+    # Keep a pure-Python fallback for environments that cannot install sxtwl.
     terms = {}
     for month, (term_month, term_day, target) in SOLAR_TERM_APPROX.items():
         center = datetime.datetime(year, term_month, term_day, 12, tzinfo=timezone)
@@ -83,11 +133,35 @@ def _solar_term(year: int, month: int, timezone_name: str) -> datetime.datetime:
     return _solar_terms(year, timezone_name)[month]
 
 
+def _get_solar_term_month_index(dt: datetime.datetime) -> int:
+    timezone_name = _timezone_name(dt)
+    boundary_month = dt.month
+    if dt < _solar_term(dt.year, boundary_month, timezone_name):
+        boundary_month -= 1
+        if boundary_month == 0:
+            boundary_month = 12
+
+    # Solar-term month 2 (立春) is 寅月, month 3 is 卯月, ..., month 12 is 子月.
+    branch_index = boundary_month % 12
+    return ((branch_index - 2) % 12) + 1
+
+
+def _get_lunar_info(dt: datetime.datetime):
+    if sxtwl is None:
+        return None
+    lunar = sxtwl.fromSolar(dt.year, dt.month, dt.day)
+    return {
+        "year": int(lunar.getLunarYear()),
+        "month": abs(int(lunar.getLunarMonth())),
+        "day": int(lunar.getLunarDay()),
+        "is_leap": bool(lunar.isLunarLeap()),
+    }
+
+
 def _get_month_index(dt: datetime.datetime) -> int:
-    month_index = dt.month
-    if dt < _solar_term(dt.year, dt.month, _timezone_name(dt)):
-        month_index -= 1
-    return month_index or 12
+    # 六爻月建以節氣為界；農曆月份只提供萬年曆日期顯示。
+    return _get_solar_term_month_index(dt)
+
 
 class CalendarEngine:
     STEMS = "甲乙丙丁戊己庚辛壬癸"
@@ -101,33 +175,18 @@ class CalendarEngine:
         if dt.tzinfo is None:
             dt = dt.replace(tzinfo=_get_timezone(DEFAULT_TIMEZONE))
 
+        lunar_info = _get_lunar_info(dt)
+
         """
         計算西曆時間對應的干支 (年, 月, 日, 時)
         """
-        # 1. 儒略日計算 (Julian Day)
-        def get_julian_day(y, m, d, h):
-            if m <= 2:
-                y -= 1
-                m += 12
-            a = math.floor(y / 100)
-            b = 2 - a + math.floor(a / 4)
-            jd = math.floor(365.25 * (y + 4716)) + math.floor(30.6001 * (m + 1)) + d + b - 1524.5
-            return jd + h / 24.0
-
         # 子初換日：23:00 起算下一個日干支。
         day_for_pillar = dt + datetime.timedelta(hours=1)
-        jd = get_julian_day(
-            day_for_pillar.year,
-            day_for_pillar.month,
-            day_for_pillar.day,
-            day_for_pillar.hour,
-        )
         
         # 2. 日干支 (以 1899-12-21 00:00 為基準，當天是 甲子日, JD = 2415010)
         # 實際上 1900-01-01 是 甲戌日
         # 這裡用 JD 計算更穩健
-        base_jd = 2415020.5 # 1900-01-01 00:00:00 (甲戌)
-        offset = int(jd - base_jd)
+        offset = (day_for_pillar.date() - datetime.date(1900, 1, 1)).days
         
         # 甲戌的索引：甲=0, 戌=10
         # 日干 = (0 + offset) % 10
@@ -164,12 +223,6 @@ class CalendarEngine:
 
         # 5. 月干支 (以節氣為界)
         # 這裡也簡化，具體需精確 24 節氣
-        months = [
-            (1, 5, '小寒'), (2, 4, '立春'), (3, 6, '驚蟄'), (4, 5, '清明'),
-            (5, 5, '立夏'), (6, 6, '芒種'), (7, 7, '小暑'), (8, 7, '立秋'),
-            (9, 8, '白露'), (10, 8, '寒露'), (11, 7, '立冬'), (12, 7, '大雪')
-        ]
-        month_idx = dt.month
         # 若在該月節氣前，算前一個月
         month_idx = _get_month_index(dt)
         
@@ -188,7 +241,7 @@ class CalendarEngine:
         month_stem = CalendarEngine.STEMS[month_stem_idx]
         month_branch = CalendarEngine.BRANCHES[month_branch_idx]
 
-        return {
+        result = {
             'year': f"{year_stem}{year_branch}",
             'month': f"{month_stem}{month_branch}",
             'day': f"{day_stem}{day_branch}",
@@ -198,3 +251,11 @@ class CalendarEngine:
             'day_stem': day_stem, 'day_branch': day_branch,
             'hour_stem': hour_stem, 'hour_branch': hour_branch
         }
+        if lunar_info is not None:
+            result.update({
+                'lunar_year': lunar_info['year'],
+                'lunar_month': lunar_info['month'],
+                'lunar_day': lunar_info['day'],
+                'lunar_is_leap': lunar_info['is_leap'],
+            })
+        return result
