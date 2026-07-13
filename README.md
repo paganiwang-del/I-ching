@@ -94,6 +94,9 @@ python main.py
 dist\ProfessionalLiuYao_V2.exe
 ~~~
 
+目前版本的 exe 已提交至 GitHub 的 dist/ProfessionalLiuYao_V2.exe，
+可在 GitHub 檔案頁面下載。
+
 桌面版的占卜紀錄會儲存在專案目錄的 divination.db。
 
 ## API 測試
