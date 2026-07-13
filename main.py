@@ -1,10 +1,10 @@
 import eel
 import os
 import json
-import datetime
 from liuyao_logic import LiuYaoEngine
 from calendar_engine import CalendarEngine
 from storage import StorageManager
+from time_utils import format_local_timestamp, resolve_client_datetime
 
 # 初始化 Eel
 eel.init('frontend')
@@ -14,16 +14,18 @@ engine = LiuYaoEngine()
 calendar = CalendarEngine()
 
 @eel.expose
-def get_gan_zhi():
-    now = datetime.datetime.now()
+def get_gan_zhi(client_now=None, client_timezone=None):
+    now = resolve_client_datetime(client_now, client_timezone)
     return calendar.get_gan_zhi(now)
 
 @eel.expose
 def process_divination(*args):
     binary_list = args[0] if len(args) > 0 else []
     question = args[1] if len(args) > 1 else "後端未接收到文字"
-    now = datetime.datetime.now()
-    timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
+    client_now = args[2] if len(args) > 2 else None
+    client_timezone = args[3] if len(args) > 3 else None
+    now = resolve_client_datetime(client_now, client_timezone)
+    timestamp = format_local_timestamp(now)
     gan_zhi = calendar.get_gan_zhi(now)
     day_stem = gan_zhi['day_stem']
     
@@ -66,9 +68,8 @@ def delete_record(record_id):
     return True
 
 def main():
-    # 啟動 Eel
-    # size 指定視窗大小
-    eel.start('index.html', size=(1200, 850))
+    # 啟動 Eel，使用無痕模式與停用快取防堵 Chrome 快取問題
+    eel.start('index.html', size=(1200, 850), cmdline_args=['--incognito', '--disable-cache'])
 
 if __name__ == '__main__':
     main()

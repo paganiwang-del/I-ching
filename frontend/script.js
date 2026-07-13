@@ -2,11 +2,13 @@
 if (typeof eel === 'undefined') {
     const API_BASE_URL = window.location.origin;
     window.eel = {
-        get_gan_zhi: () => () => fetch(`${API_BASE_URL}/api/ganzhi`).then(r => r.json()),
-        process_divination: (binary_list, question) => () => fetch(`${API_BASE_URL}/api/divination`, {
+        get_gan_zhi: (clientNow, clientTimezone) => () => fetch(
+            `${API_BASE_URL}/api/ganzhi?client_now=${encodeURIComponent(clientNow)}&client_timezone=${encodeURIComponent(clientTimezone)}`
+        ).then(r => r.json()),
+        process_divination: (binary_list, question, clientNow, clientTimezone) => () => fetch(`${API_BASE_URL}/api/divination`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ binary_list, question })
+            body: JSON.stringify({ binary_list, question, client_now: clientNow, client_timezone: clientTimezone })
         }).then(r => r.json()),
         get_history: () => () => Promise.resolve([]),
         delete_record: () => () => Promise.resolve(true)
@@ -22,6 +24,13 @@ if (typeof eel === 'undefined') {
 }
 // ========================================================
 
+function getClientTimeContext() {
+    return {
+        clientNow: new Date().toISOString(),
+        clientTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Taipei'
+    };
+}
+
 const coinArea = document.getElementById('coin-area');
 const btnToss = document.getElementById('btn-toss');
 const statusText = document.getElementById('status-text');
@@ -34,6 +43,8 @@ const historyList = document.getElementById('history-list');
 let tossCount = 0;
 let results = [];
 let lastDivinationData = null;
+let divinationStartedAt = null;
+let divinationTimezone = null;
 
 /**
  * 聲學引擎：利用 Web Audio API 即時生成硬幣碰撞聲
@@ -116,7 +127,8 @@ const soundEngine = new CoinSound();
 async function init() {
     try {
         if (typeof eel !== 'undefined') {
-            const ganzhi = await eel.get_gan_zhi()();
+            const timeContext = getClientTimeContext();
+            const ganzhi = await eel.get_gan_zhi(timeContext.clientNow, timeContext.clientTimezone)();
             currentGanZhi.innerText = `${ganzhi.year}年 ${ganzhi.month}月 ${ganzhi.day}日 ${ganzhi.hour}時`;
         }
     } catch (e) {
@@ -270,6 +282,12 @@ function initNatureCanvas() {
 btnToss.addEventListener('click', async () => {
     if (tossCount >= 6) return;
 
+    if (tossCount === 0) {
+        const timeContext = getClientTimeContext();
+        divinationStartedAt = timeContext.clientNow;
+        divinationTimezone = timeContext.clientTimezone;
+    }
+
     // 播放震動動畫與音效
     coinArea.classList.add('shaking');
     soundEngine.playShake(800);
@@ -342,8 +360,14 @@ async function finalizeDivination() {
         if (typeof eel !== 'undefined') {
             const questionInput = document.getElementById('question-input');
             const question = questionInput && questionInput.value.trim() ? questionInput.value.trim() : '前端擷取失敗';
-            
-            const finalData = await eel.process_divination(results, question)();
+
+            const timeContext = getClientTimeContext();
+            const finalData = await eel.process_divination(
+                results,
+                question,
+                divinationStartedAt || timeContext.clientNow,
+                divinationTimezone || timeContext.clientTimezone
+            )();
             console.log("排盤結果:", finalData);
             if (finalData) {
                 lastDivinationData = finalData;

@@ -6,9 +6,9 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from fastapi import FastAPI, Body
 from fastapi.middleware.cors import CORSMiddleware
-import datetime
 from liuyao_logic import LiuYaoEngine
 from calendar_engine import CalendarEngine
+from time_utils import format_local_timestamp, resolve_client_datetime
 
 app = FastAPI()
 
@@ -25,8 +25,8 @@ engine = LiuYaoEngine()
 calendar = CalendarEngine()
 
 @app.get("/api/ganzhi")
-def get_gan_zhi():
-    now = datetime.datetime.now()
+def get_gan_zhi(client_now: str | None = None, client_timezone: str | None = None):
+    now = resolve_client_datetime(client_now, client_timezone)
     return calendar.get_gan_zhi(now)
 
 @app.post("/api/divination")
@@ -36,8 +36,8 @@ def process_divination(payload: dict = Body(...)):
     if not binary_list:
         return {"error": "Invalid binary list"}
         
-    now = datetime.datetime.now()
-    timestamp = now.strftime("%Y-%m-%d %H:%M:%S")
+    now = resolve_client_datetime(payload.get("client_now"), payload.get("client_timezone"))
+    timestamp = format_local_timestamp(now)
     gan_zhi = calendar.get_gan_zhi(now)
     day_stem = gan_zhi['day_stem']
     
